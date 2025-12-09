@@ -6,21 +6,27 @@ import (
 	"sync"
 	"time"
 
-	"BabelBridge/backend"
+	babel "BabelBridge/backend"
 
 	"golang.org/x/text/language"
 )
 
-// BabelService is the production adapter implementing TranslationService backed by backend.Backend
+// BackendInterface defines the interface for translation backends
+type BackendInterface interface {
+	NewTranslation(ctx context.Context, input string, outputLanguage language.Tag) (*babel.TranslationContext, string, error)
+	IdentifyLanguage(ctx context.Context, input string) (language.Tag, error)
+}
+
+// BabelService is the production adapter implementing TranslationService backed by BackendInterface
 type BabelService struct {
 	mu        sync.Mutex
-	b         *babel.Backend
+	b         BackendInterface
 	contexts  map[string]*babel.TranslationContext
 	lastTouch map[string]time.Time
 	ttl       time.Duration
 }
 
-func NewBabelService(b *babel.Backend, ttl time.Duration) *BabelService {
+func NewBabelService(b BackendInterface, ttl time.Duration) *BabelService {
 	return &BabelService{
 		b:         b,
 		contexts:  make(map[string]*babel.TranslationContext),

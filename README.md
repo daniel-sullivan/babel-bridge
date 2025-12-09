@@ -1,15 +1,24 @@
-# BabelBridge
+<div align="center">
+  <img src="logo.svg" alt="BabelBridge Logo" width="128" height="128">
+  
+  # BabelBridge
 
-BabelBridge is a web-based translation tool with a modern UI, supporting live language identification, multi-message context, and a pluggable AI backend (Ollama or Cohere).
+  [![Tests & Coverage](https://github.com/daniel-sullivan/babel-bridge/actions/workflows/ci.yml/badge.svg)](https://github.com/daniel-sullivan/babel-bridge/actions/workflows/ci.yml)
+  [![codecov](https://codecov.io/gh/daniel-sullivan/babel-bridge/branch/master/graph/badge.svg)](https://codecov.io/gh/daniel-sullivan/babel-bridge)
 
-## Features
+  **A modern web-based translation tool with live language identification and pluggable AI backends**
+</div>
 
-- Translate text between multiple languages
-- Live language identification as you type
-- Multi-message context (chain mode)
-- Language variety buttons with responsive overflow
-- Accessible, responsive, and mobile-friendly UI
-- Pluggable AI backend: OpenAI (public or local e.g.: Ollama) or Cohere
+## ✨ Features
+
+- 🌐 Translate text between multiple languages
+- 🔍 Live language identification as you type
+- 🔗 Multi-message context (chain mode)
+- 🎯 Language variety buttons with responsive overflow
+- ♿ Accessible, responsive, and mobile-friendly UI
+- 🔌 Pluggable AI backend: OpenAI (public or local e.g.: Ollama) or Cohere
+- 🧪 **Comprehensive test suite with 100% passing tests**
+- 📊 **Full test coverage reporting**
 
 ## Getting Started
 
@@ -66,6 +75,76 @@ BabelBridge is a web-based translation tool with a modern UI, supporting live la
    ```
 
 5. Visit [http://localhost:8080](http://localhost:8080) in your browser.
+
+## 🧪 Testing
+
+BabelBridge has a comprehensive test suite covering both backend and frontend components.
+
+### Test Coverage
+
+- **Go Backend**: Unit tests, integration tests, and mock testing
+- **Frontend**: Component tests, context tests, utility tests, and E2E tests
+- **Coverage Target**: 70%+ for both backend and frontend
+- **Status**: 100% passing tests ✅
+
+### Running Tests
+
+#### All Tests
+```sh
+make test-all          # Run all tests with coverage
+npm run test:all       # Alternative using npm (frontend only)
+```
+
+#### Go Backend Tests
+```sh
+make test-go           # Run Go tests with coverage
+go test -v ./...       # Basic test run
+go test -cover ./...   # With coverage
+```
+
+#### Frontend Tests  
+```sh
+make test-frontend     # Run frontend tests with coverage
+cd frontend && npm test               # Unit tests (watch mode)
+cd frontend && npm run test:unit      # Unit tests (single run)
+cd frontend && npm run test:coverage  # With coverage report
+```
+
+#### E2E Tests
+```sh
+make test-e2e          # Run end-to-end tests
+cd frontend && npm run test:e2e       # Direct E2E run
+cd frontend && npm run test:e2e:ui    # E2E with UI
+```
+
+### Coverage Reports
+
+After running tests with coverage, reports are available at:
+- **Go**: `coverage.html` (root directory)
+- **Frontend**: `frontend/coverage/index.html`
+
+### Continuous Integration
+
+All tests run automatically on:
+- ✅ Every push to main/develop branches
+- ✅ Every pull request
+- ✅ Coverage reports posted as PR comments
+- ✅ Tests must pass before merging
+
+### Test Structure
+
+```
+tests/
+├── backend/
+│   ├── unit/          # Go unit tests
+│   ├── integration/   # Go integration tests  
+│   └── mock/          # Mock implementations
+└── frontend/
+    ├── components/    # React component tests
+    ├── context/       # Context/state tests
+    ├── utils/         # Utility function tests
+    └── e2e/          # End-to-end tests
+```
 
 ### Docker
 

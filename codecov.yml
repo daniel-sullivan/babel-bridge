@@ -1,0 +1,34 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 70%
+        threshold: 5%
+    patch:
+      default:
+        target: 70%
+
+  ignore:
+    - "frontend/src/test-setup.ts"
+    - "frontend/src/main.tsx"
+    - "frontend/src/assets/**"
+    - "**/*.d.ts"
+    - "**/mock*.go"
+    - "**/testdata/**"
+    - "main.go"
+
+comment:
+  layout: "reach,diff,flags,tree"
+  behavior: default
+  require_changes: false
+  require_base: no
+  require_head: yes
+
+flags:
+  go:
+    paths:
+      - "*.go"
+      - "**/*.go"
+  frontend:
+    paths:
+      - "frontend/src/**"

@@ -4,6 +4,7 @@ import (
 	"BabelBridge/service"
 	"log/slog"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-contrib/sessions"
@@ -55,12 +56,28 @@ func NewServerWithTTLs(svc service.TranslationService, sessTTL, ctxTTL time.Dura
 		cookieSameSite: http.SameSiteLaxMode,
 	}
 
+	api := r.Group("/api")
+	sessionHandler := []gin.HandlerFunc{func(c *gin.Context) {
+		s.issueSessionHandler(c)
+		if c.IsAborted() {
+			return
+		}
+		c.Data(http.StatusOK, "text/plain; charset=utf-8", []byte("OK"))
+	}}
+
 	// rate limiting setup
-	memStore := memory.NewStore()
-	limiterSession := limiterpkg.New(memStore, limiterpkg.Rate{Period: time.Minute, Limit: 5})
-	limiterAPI := limiterpkg.New(memStore, limiterpkg.Rate{Period: time.Minute, Limit: 30})
-	limiterSessionMW := ginlimiter.NewMiddleware(limiterSession)
-	limiterAPIMW := ginlimiter.NewMiddleware(limiterAPI)
+	if os.Getenv("RATE_LIMITING_ENABLED") == "true" {
+		slog.Info("Rate limiting enabled")
+		memStore := memory.NewStore()
+		limiterSession := limiterpkg.New(memStore, limiterpkg.Rate{Period: time.Minute, Limit: 5})
+		limiterAPI := limiterpkg.New(memStore, limiterpkg.Rate{Period: time.Minute, Limit: 30})
+		limiterSessionMW := ginlimiter.NewMiddleware(limiterSession)
+		limiterAPIMW := ginlimiter.NewMiddleware(limiterAPI)
+		sessionHandler = append([]gin.HandlerFunc{limiterSessionMW}, sessionHandler...)
+		api.Use(limiterAPIMW)
+	} else {
+		slog.Warn("Rate limiting disabled")
+	}
 
 	// serve static assets for the frontend
 	r.Static("/assets", "frontend/dist/assets")
@@ -75,16 +92,8 @@ func NewServerWithTTLs(svc service.TranslationService, sessTTL, ctxTTL time.Dura
 	})
 
 	// manual session creation endpoint when front-end is running on a separate service
-	r.GET("/session", limiterSessionMW, func(c *gin.Context) {
-		s.issueSessionHandler(c)
-		if c.IsAborted() {
-			return
-		}
-		c.Data(http.StatusOK, "text/plain; charset=utf-8", []byte("OK"))
-	})
+	r.GET("/session", sessionHandler...)
 
-	api := r.Group("/api")
-	api.Use(limiterAPIMW)
 	api.Use(s.sessionMiddleware())
 	{
 		api.POST("/translate/start", s.startTranslation)

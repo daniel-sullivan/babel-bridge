@@ -1,25 +1,30 @@
-import { defineConfig } from 'vite'
-import { defineConfig as defineVitestConfig } from 'vitest/config'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vitest/config'
 
-export default defineConfig(
-  defineVitestConfig({
-    plugins: [react()],
-    test: {
-      globals: true,
-      environment: 'jsdom',
-      setupFiles: ['./src/test-setup.ts'],
-      coverage: {
-        provider: 'v8',
-        reporter: ['text', 'json', 'html'],
-        exclude: [
-          'node_modules/',
-          'tests/',
-          'dist/',
-          '**/*.d.ts',
-          'src/test-setup.ts'
-        ]
+export default defineConfig({
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test-setup.ts'],
+    globals: true,
+    include: ['tests/**/*.spec.{ts,tsx}'],
+    exclude: ['tests/e2e/**/*.spec.{ts,tsx}'], // E2E tests should run with Playwright, not Vitest
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: [
+        'src/**/*.d.ts',
+        'src/test-setup.ts',
+        'src/main.tsx',
+        'src/assets/**'
+      ],
+      thresholds: {
+        global: {
+          branches: 70,
+          functions: 70,
+          lines: 70,
+          statements: 70
+        }
       }
-    },
-  })
-)
+    }
+  },
+})
