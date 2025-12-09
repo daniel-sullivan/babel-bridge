@@ -1,12 +1,12 @@
-name: Pull Request CI
+name: Tests & Coverage
 
 on:
   pull_request:
     branches: [ main, develop ]
 
 jobs:
-  backend-tests:
-    name: Backend Tests
+  tests:
+    name: Run Tests & Coverage
     runs-on: ubuntu-latest
 
     steps:
@@ -17,34 +17,6 @@ jobs:
         with:
           go-version: '1.21'
 
-      - name: Cache Go modules
-        uses: actions/cache@v3
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
-      - name: Download dependencies
-        run: go mod download
-
-      - name: Run Go tests with coverage
-        run: go test ./... -v -coverprofile=coverage.out -covermode=atomic
-
-      - name: Upload Go coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage.out
-          flags: backend
-          name: backend-coverage
-
-  frontend-tests:
-    name: Frontend Tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -52,21 +24,20 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install frontend dependencies
-        working-directory: ./frontend
-        run: npm ci
+      - name: Install dependencies
+        run: |
+          go mod download
+          cd frontend && npm ci
 
-      - name: Run frontend unit tests
-        working-directory: ./frontend
-        run: npm run test:unit --if-present
+      - name: Run Go tests with coverage
+        run: go test ./... -v -coverprofile=coverage.out -covermode=atomic
 
       - name: Run frontend tests with coverage
         working-directory: ./frontend
         run: npm run test:coverage
 
-      - name: Upload frontend coverage to Codecov
+      - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
-          directory: ./frontend/coverage
-          flags: frontend
-          name: frontend-coverage
+          files: ./coverage.out,./frontend/coverage/lcov.info
+          fail_ci_if_error: false
