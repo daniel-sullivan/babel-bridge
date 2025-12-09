@@ -1,5 +1,10 @@
 # BabelBridge
 
+[![CI/CD Pipeline](https://github.com/USERNAME/BabelBridge/actions/workflows/ci.yml/badge.svg)](https://github.com/USERNAME/BabelBridge/actions/workflows/ci.yml)
+[![Release](https://github.com/USERNAME/BabelBridge/actions/workflows/release.yml/badge.svg)](https://github.com/USERNAME/BabelBridge/actions/workflows/release.yml)
+[![Security](https://github.com/USERNAME/BabelBridge/actions/workflows/security.yml/badge.svg)](https://github.com/USERNAME/BabelBridge/actions/workflows/security.yml)
+[![codecov](https://codecov.io/gh/USERNAME/BabelBridge/branch/main/graph/badge.svg)](https://codecov.io/gh/USERNAME/BabelBridge)
+
 BabelBridge is a web-based translation tool with a modern UI, supporting live language identification, multi-message context, and a pluggable AI backend (Ollama or Cohere).
 
 ## Features

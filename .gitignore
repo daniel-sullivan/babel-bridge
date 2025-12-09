@@ -3,3 +3,13 @@ frontend/dist
 frontend/playwright-report
 frontend/test-results
 *.exe
+
+# Ignore TypeScript buildinfo files
+*.tsbuildinfo
+
+# Ignore IDE metadata
+.idea/
+
+# Ignore frontend build artifacts
+frontend/.idea/
+frontend/tsconfig.tsbuildinfo

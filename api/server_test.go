@@ -2,6 +2,7 @@ package api_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -68,7 +69,7 @@ func issueSession(t *testing.T, s *api.Server) []*http.Cookie {
 	s.Engine.ServeHTTP(w, req)
 
 	res := w.Result()
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 
 	require.Equal(t, http.StatusOK, res.StatusCode)
 	return res.Cookies()
@@ -124,7 +125,7 @@ func TestSessionRequired(t *testing.T) {
 	})
 
 	res := w.Result()
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 	require.Equal(t, http.StatusUnauthorized, res.StatusCode)
 }
 
@@ -136,7 +137,7 @@ func TestStartTranslationSucceedsWithSession(t *testing.T) {
 	})
 
 	res := w.Result()
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 	require.Equal(t, http.StatusOK, res.StatusCode)
 
 	var payload startResp
@@ -154,7 +155,7 @@ func TestPreviewTranslationRequiresSession(t *testing.T) {
 	})
 
 	res := w.Result()
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 	require.Equal(t, http.StatusOK, res.StatusCode)
 
 	var payload previewResp
@@ -170,7 +171,7 @@ func TestIdentifyLanguageRequiresSession(t *testing.T) {
 	})
 
 	res := w.Result()
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 	require.Equal(t, http.StatusOK, res.StatusCode)
 
 	var payload identifyResp
@@ -202,112 +203,188 @@ func TestImproveTranslationUsesExistingContext(t *testing.T) {
 	require.Equal(t, "Hola. Me encanta la pizza.", improvePayload.Result)
 }
 
-func TestRateLimitingProtection(t *testing.T) {
-	cs := newClientSession(t)
-
-	// Make rapid requests to trigger rate limiting
-	const numRequests = 15
-	var statusCodes []int
-
-	for i := 0; i < numRequests; i++ {
-		w := cs.doRequest(t, http.MethodPost, "/api/translate/start", `{"source":"Hello","lang":"es"}`, requestOptions{
-			IncludeSessionToken: true,
-		})
-
-		statusCodes = append(statusCodes, w.Code)
-
-		// Small delay to avoid overwhelming the test
-		time.Sleep(10 * time.Millisecond)
-	}
-
-	// Check that some requests succeeded and some were rate limited
-	successCount := 0
-	rateLimitedCount := 0
-
-	for _, code := range statusCodes {
-		switch code {
-		case http.StatusOK:
-			successCount++
-		case http.StatusTooManyRequests:
-			rateLimitedCount++
-		default:
-			t.Errorf("Unexpected status code: %d", code)
-		}
-	}
-
-	// At least the first few requests should succeed
-	require.Greater(t, successCount, 0, "At least some requests should succeed")
-
-	// If rate limiting is enabled, some requests should be blocked
-	if rateLimitedCount > 0 {
-		t.Logf("Rate limiting is working: %d/%d requests were rate limited", rateLimitedCount, numRequests)
-	} else {
-		t.Logf("Rate limiting appears to be disabled: all %d requests succeeded", successCount)
-	}
-
-	require.Equal(t, numRequests, successCount+rateLimitedCount, "All requests should either succeed or be rate limited")
-}
-
-func TestRateLimitingRecovery(t *testing.T) {
-	cs := newClientSession(t)
-
-	// Make rapid requests to potentially trigger rate limiting
-	for i := 0; i < 10; i++ {
-		w := cs.doRequest(t, http.MethodPost, "/api/translate/identify", `{"source":"Hello"}`, requestOptions{
-			IncludeSessionToken: true,
-		})
-
-		// Don't fail if we hit rate limiting - just continue
-		if w.Code != http.StatusOK && w.Code != http.StatusTooManyRequests {
-			t.Errorf("Unexpected status code during rapid requests: %d", w.Code)
-		}
-
-		time.Sleep(5 * time.Millisecond)
-	}
-
-	// Wait for rate limiting to reset
-	time.Sleep(2 * time.Second)
-
-	// Now make a normal request - it should succeed
-	w := cs.doRequest(t, http.MethodPost, "/api/translate/identify", `{"source":"Hello"}`, requestOptions{
-		IncludeSessionToken: true,
-	})
-
-	require.Equal(t, http.StatusOK, w.Code, "Request should succeed after waiting for rate limit reset")
-
-	var payload identifyResp
-	require.NoError(t, json.NewDecoder(w.Body).Decode(&payload))
-	require.Equal(t, "en-US", payload.Lang)
-}
-
-func TestDifferentEndpointsRateLimiting(t *testing.T) {
-	cs := newClientSession(t)
-
-	endpoints := []struct {
-		path string
-		body string
+// runWithRateLimitingModes runs the provided test function twice: once with
+// RATE_LIMITING_ENABLED=true and once with it unset. The subtest name includes
+// the env state (e.g. "RATE_LIMITING=true" or "RATE_LIMITING=unset").
+func runWithRateLimitingModes(t *testing.T, fn func(t *testing.T, enabled bool)) {
+	modes := []struct {
+		name string
+		env  string
 	}{
-		{"/api/translate/identify", `{"source":"Hello"}`},
-		{"/api/translate/preview", `{"source":"Hello","lang":"es"}`},
-		{"/api/translate/start", `{"source":"Hello","lang":"es"}`},
+		{name: "enabled", env: "true"},
+		{name: "disabled", env: ""},
 	}
 
-	// Test that each endpoint can handle requests properly
-	for _, endpoint := range endpoints {
-		t.Run(endpoint.path, func(t *testing.T) {
-			w := cs.doRequest(t, http.MethodPost, endpoint.path, endpoint.body, requestOptions{
+	for _, mode := range modes {
+		mode := mode
+		var display string
+		if mode.env == "" {
+			display = "unset"
+		} else {
+			display = mode.env
+		}
+		subName := fmt.Sprintf("%s (RATE_LIMITING=%s)", mode.name, display)
+		// capture mode for closure
+		enabled := mode.env == "true"
+		t.Run(subName, func(t *testing.T) {
+			// Set environment for this subtest. Use t.Setenv so it's cleaned up automatically.
+			t.Setenv("RATE_LIMITING_ENABLED", mode.env)
+			fn(t, enabled)
+		})
+	}
+}
+
+// doSessionRequest performs a GET /session request against the provided server
+// and returns the HTTP status code without asserting. Caller should not assume
+// the code is 200.
+func doSessionRequest(s *api.Server) int {
+	req := httptest.NewRequest(http.MethodGet, "/session", nil)
+	w := httptest.NewRecorder()
+	s.Engine.ServeHTTP(w, req)
+	res := w.Result()
+	_ = res.Body.Close()
+	return res.StatusCode
+}
+
+func TestRateLimiting(t *testing.T) {
+	runWithRateLimitingModes(t, func(t *testing.T, enabled bool) {
+		t.Run("Protection", func(t *testing.T) {
+			cs := newClientSession(t)
+
+			// Check session endpoint under load
+			const sessionAttempts = 20
+			session429s := 0
+			for i := 0; i < sessionAttempts; i++ {
+				code := doSessionRequest(cs.server)
+				if code == http.StatusTooManyRequests {
+					session429s++
+				}
+				// tiny pause
+				time.Sleep(5 * time.Millisecond)
+			}
+
+			// Make rapid requests to trigger rate limiting on API endpoints
+			const numRequests = 20
+			var statusCodes []int
+
+			for i := 0; i < numRequests; i++ {
+				w := cs.doRequest(t, http.MethodPost, "/api/translate/start", `{"source":"Hello","lang":"es"}`, requestOptions{
+					IncludeSessionToken: true,
+				})
+
+				statusCodes = append(statusCodes, w.Code)
+
+				// Small delay to avoid overwhelming the test
+				time.Sleep(10 * time.Millisecond)
+			}
+
+			// Check that some requests succeeded and some were rate limited
+			successCount := 0
+			rateLimitedCount := 0
+
+			for _, code := range statusCodes {
+				switch code {
+				case http.StatusOK:
+					successCount++
+				case http.StatusTooManyRequests:
+					rateLimitedCount++
+				default:
+					t.Errorf("Unexpected status code: %d", code)
+				}
+			}
+
+			// At least the first few requests should succeed
+			require.Greater(t, successCount, 0, "At least some requests should succeed")
+
+			if enabled {
+				// When enabled we expect some rate limited responses on session and/or API
+				require.Greater(t, rateLimitedCount+session429s, 0, "Expected some 429 responses when rate limiting enabled (either on API endpoints or /session)")
+			} else {
+				// When disabled we should see no 429s
+				require.Equal(t, 0, rateLimitedCount, "Did not expect 429 responses when rate limiting disabled")
+				require.Equal(t, 0, session429s, "Did not expect 429 responses on /session when rate limiting disabled")
+			}
+
+			// Final sanity: all recorded status codes should be accounted for
+			require.Equal(t, numRequests, successCount+rateLimitedCount, "All requests should either succeed or be rate limited")
+		})
+
+		t.Run("Recovery", func(t *testing.T) {
+			cs := newClientSession(t)
+
+			// Make rapid requests to potentially trigger rate limiting
+			hit429 := 0
+			for i := 0; i < 10; i++ {
+				w := cs.doRequest(t, http.MethodPost, "/api/translate/identify", `{"source":"Hello"}`, requestOptions{
+					IncludeSessionToken: true,
+				})
+
+				if w.Code == http.StatusTooManyRequests {
+					hit429++
+				} else if w.Code != http.StatusOK {
+					t.Errorf("Unexpected status code during rapid requests: %d", w.Code)
+				}
+
+				time.Sleep(5 * time.Millisecond)
+			}
+
+			if enabled {
+				// Expect some 429s during rapid requests when enabled; allow them to appear on identify or session
+				require.True(t, hit429 > 0 || doSessionRequest(cs.server) == http.StatusTooManyRequests,
+					"Expected some 429s during rapid requests when enabled (either on identify or /session)")
+			} else {
+				require.Equal(t, 0, hit429, "Did not expect 429s during rapid requests when disabled")
+			}
+
+			// Wait for rate limiting to reset
+			time.Sleep(2 * time.Second)
+
+			// Now make a normal request - it should succeed
+
+			w := cs.doRequest(t, http.MethodPost, "/api/translate/identify", `{"source":"Hello"}`, requestOptions{
 				IncludeSessionToken: true,
 			})
 
-			// Should either succeed or be rate limited - both are valid responses
-			require.True(t, w.Code == http.StatusOK || w.Code == http.StatusTooManyRequests,
-				"Status should be either 200 or 429, got %d", w.Code)
+			require.Equal(t, http.StatusOK, w.Code, "Request should succeed after waiting for rate limit reset")
 
-			if w.Code == http.StatusOK {
-				t.Logf("Endpoint %s: Request succeeded", endpoint.path)
+			var payload identifyResp
+			require.NoError(t, json.NewDecoder(w.Body).Decode(&payload))
+			require.Equal(t, "en-US", payload.Lang)
+		})
+
+		t.Run("DifferentEndpoints", func(t *testing.T) {
+			cs := newClientSession(t)
+
+			endpoints := []struct {
+				path string
+				body string
+			}{
+				{"/api/translate/identify", `{"source":"Hello"}`},
+				{"/api/translate/preview", `{"source":"Hello","lang":"es"}`},
+				{"/api/translate/start", `{"source":"Hello","lang":"es"}`},
+			}
+
+			// hit each endpoint multiple times and collect 429s
+			total429 := 0
+			for _, endpoint := range endpoints {
+				for i := 0; i < 3; i++ {
+					w := cs.doRequest(t, http.MethodPost, endpoint.path, endpoint.body, requestOptions{
+						IncludeSessionToken: true,
+					})
+					if w.Code == http.StatusTooManyRequests {
+						total429++
+					} else if w.Code != http.StatusOK {
+						t.Errorf("Unexpected status code for %s: %d", endpoint.path, w.Code)
+					}
+				}
+			}
+
+			if enabled {
+				require.True(t, total429 > 0 || doSessionRequest(cs.server) == http.StatusTooManyRequests,
+					"Expected some 429s across endpoints when enabled (or on /session)")
 			} else {
-				t.Logf("Endpoint %s: Request was rate limited", endpoint.path)
+				require.Equal(t, 0, total429, "Did not expect 429s across endpoints when disabled")
 			}
 		})
-	}
+	})
 }

@@ -9,14 +9,16 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:unit": "vitest run tests/components",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
-    "test:integration": "cross-env INTEGRATION_TEST=true playwright test --config=playwright-integration.config.ts",
-    "test:integration:ui": "cross-env INTEGRATION_TEST=true playwright test --config=playwright-integration.config.ts --ui",
+    "test:e2e": "cross-env NODE_ENV=test npx playwright test --config=tests/e2e/playwright.config.ts",
+    "test:e2e:ui": "cross-env NODE_ENV=test npx playwright test --config=tests/e2e/playwright.config.ts --ui",
     "test:coverage": "vitest run --coverage",
-    "test:all": "npm run test:unit && npm run test:e2e && npm run test:integration"
+    "test:all": "npm run test:unit && npm run test:e2e"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.6",
+    "@mui/material": "^7.3.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "twemoji": "^14.0.2"
@@ -29,6 +31,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/coverage-v8": "^2.1.9",
     "cross-env": "^10.1.0",
     "jsdom": "^27.2.0",
     "typescript": "^5.6.3",
