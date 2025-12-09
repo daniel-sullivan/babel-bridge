@@ -1,12 +1,13 @@
-# BabelBridge
+<div align="center">
+  <img src="logo.svg" alt="BabelBridge Logo" width="128" height="128">
+  
+  # BabelBridge
 
-[![Test & Coverage](https://github.com/USERNAME/BabelBridge/actions/workflows/test.yml/badge.svg)](https://github.com/USERNAME/BabelBridge/actions/workflows/test.yml)
-[![PR Status Checks](https://github.com/USERNAME/BabelBridge/actions/workflows/pr-checks.yml/badge.svg)](https://github.com/USERNAME/BabelBridge/actions/workflows/pr-checks.yml)
-[![codecov](https://codecov.io/gh/USERNAME/BabelBridge/branch/main/graph/badge.svg)](https://codecov.io/gh/USERNAME/BabelBridge)
-[![Go Coverage](https://codecov.io/gh/USERNAME/BabelBridge/branch/main/graph/badge.svg?flag=go)](https://codecov.io/gh/USERNAME/BabelBridge?flag=go)
-[![Frontend Coverage](https://codecov.io/gh/USERNAME/BabelBridge/branch/main/graph/badge.svg?flag=frontend)](https://codecov.io/gh/USERNAME/BabelBridge?flag=frontend)
+  [![Tests & Coverage](https://github.com/daniel-sullivan/babel-bridge/actions/workflows/ci.yml/badge.svg)](https://github.com/daniel-sullivan/babel-bridge/actions/workflows/ci.yml)
+  [![codecov](https://codecov.io/gh/daniel-sullivan/babel-bridge/branch/master/graph/badge.svg)](https://codecov.io/gh/daniel-sullivan/babel-bridge)
 
-BabelBridge is a web-based translation tool with a modern UI, supporting live language identification, multi-message context, and a pluggable AI backend (Ollama or Cohere).
+  **A modern web-based translation tool with live language identification and pluggable AI backends**
+</div>
 
 ## ✨ Features
 

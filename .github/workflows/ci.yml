@@ -20,7 +20,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
@@ -32,15 +32,6 @@ jobs:
       - name: Run Go tests with coverage
         run: go test ./... -v -coverprofile=coverage.out -covermode=atomic
 
-      - name: Debug test files
-        working-directory: ./frontend
-        run: |
-          echo "=== Checking test files ==="
-          find tests -name "*.spec.ts" -o -name "*.spec.tsx" | head -20
-          echo "=== Checking vitest config ==="
-          cat vitest.config.ts
-          echo "=== Checking package.json test scripts ==="
-          grep -A5 -B5 "test:" package.json
 
       - name: Run frontend tests with coverage
         working-directory: ./frontend
