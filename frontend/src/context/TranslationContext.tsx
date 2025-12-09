@@ -2,7 +2,7 @@ import React, { createContext, useContext, useReducer, ReactNode } from 'react'
 import { TranslationState, TranslationContext as TContext, HistoryItem } from '../types/translation'
 
 // Define action types
-type TranslationAction =
+export type TranslationAction =
   | { type: 'SET_LOADING'; payload: { type: keyof TranslationState['loading']; value: boolean } }
   | { type: 'SET_LOADING_TARGET'; payload: string | null }
   | { type: 'SET_ERROR'; payload: string | null }
@@ -30,7 +30,7 @@ const initialState: TranslationState = {
 }
 
 // Reducer
-function translationReducer(state: TranslationState, action: TranslationAction): TranslationState {
+export function translationReducer(state: TranslationState, action: TranslationAction): TranslationState {
   switch (action.type) {
     case 'SET_LOADING':
       return {
@@ -69,7 +69,7 @@ interface TranslationContextValue {
   dispatch: React.Dispatch<TranslationAction>
 }
 
-const TranslationContext = createContext<TranslationContextValue | null>(null)
+export const TranslationContext = createContext<TranslationContextValue | null>(null)
 
 // Provider component
 interface TranslationProviderProps {

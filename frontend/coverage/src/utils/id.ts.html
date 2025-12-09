@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">76.19% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/15</span>
+                <span class='fraction'>16/21</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">83.33% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>5/6</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">76.19% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/15</span>
+                <span class='fraction'>16/21</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -81,17 +81,29 @@
 <a name='L16'></a><a href='#L16'>16</a>
 <a name='L17'></a><a href='#L17'>17</a>
 <a name='L18'></a><a href='#L18'>18</a>
-<a name='L19'></a><a href='#L19'>19</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">12157x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">12157x</span>
+<span class="cline-any cline-yes">12157x</span>
+<span class="cline-any cline-yes">376867x</span>
+<span class="cline-any cline-yes">376867x</span>
+<span class="cline-any cline-yes">376867x</span>
+<span class="cline-any cline-yes">376867x</span>
+<span class="cline-any cline-yes">376867x</span>
+<span class="cline-any cline-yes">12157x</span>
+<span class="cline-any cline-yes">12157x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -99,23 +111,41 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// Utility function for generating UUIDs
-<span class="cstat-no" title="statement not covered" >export function generateId(): string {</span>
-<span class="cstat-no" title="statement not covered" >  if (typeof crypto !== 'undefined' &amp;&amp; crypto.getRandomValues) {</span>
-<span class="cstat-no" title="statement not covered" >    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {</span>
-<span class="cstat-no" title="statement not covered" >      const array = new Uint32Array(1);</span>
-<span class="cstat-no" title="statement not covered" >      crypto.getRandomValues(array);</span>
-<span class="cstat-no" title="statement not covered" >      const r = array[0] % 16;</span>
-<span class="cstat-no" title="statement not covered" >      const v = c === 'x' ? r : (r &amp; 0x3 | 0x8);</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">12157x</span>
+<span class="cline-any cline-yes">7597x</span>
+<span class="cline-any cline-yes">7597x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">12157x</span>
+<span class="cline-any cline-yes">12157x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// Utility function for generating UUIDs that are safe for DOM element IDs
+export function generateId(): string {
+  let id: string;
+&nbsp;
+  if (typeof crypto !== 'undefined' &amp;&amp; crypto.getRandomValues) {
+    id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const array = new Uint32Array(1);
+      crypto.getRandomValues(array);
+      const r = array[0] % 16;
+      const v = c === 'x' ? r : (r &amp; 0x3 | 0x8);
+      return v.toString(16);
+    });
+<span class="branch-0 cbranch-no" title="branch not covered" >  } else {</span>
+    // Fallback: Math.random (not cryptographically secure)
+<span class="cstat-no" title="statement not covered" >    id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c: string) {</span>
+<span class="cstat-no" title="statement not covered" >      var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r &amp; 0x3 | 0x8);</span>
 <span class="cstat-no" title="statement not covered" >      return v.toString(16);</span>
 <span class="cstat-no" title="statement not covered" >    });</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
-  // Fallback: Math.random (not cryptographically secure)
-<span class="cstat-no" title="statement not covered" >  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c: string) {</span>
-<span class="cstat-no" title="statement not covered" >    var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r &amp; 0x3 | 0x8);</span>
-<span class="cstat-no" title="statement not covered" >    return v.toString(16);</span>
-<span class="cstat-no" title="statement not covered" >  });</span>
-<span class="cstat-no" title="statement not covered" >}</span>
+&nbsp;
+  // Ensure the ID starts with a letter for DOM compatibility
+  if (!/^[a-zA-Z]/.test(id)) {
+    id = 'id-' + id;
+  }
+&nbsp;
+  return id;
+}
 &nbsp;
 &nbsp;</pre></td></tr></table></pre>
 
@@ -124,7 +154,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-12-09T02:26:08.269Z
+                at 2025-12-09T04:18:59.006Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

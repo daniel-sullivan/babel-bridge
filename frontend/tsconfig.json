@@ -11,7 +11,8 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "types": ["vitest/globals", "jsdom", "@testing-library/jest-dom", "node"]
   },
-  "include": ["src"]
+  "include": ["src", "tests"]
 }
