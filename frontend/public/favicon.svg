@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#22C55E"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="36" fill="#0f1220" stroke="#22283a" stroke-width="4"/>
+  <!-- Stylized B made of two speech bubbles (bridge between languages) -->
+  <path d="M84 64h56c28 0 44 14 44 32 0 14-10 26-28 30 20 4 32 16 32 32 0 20-18 34-46 34H84V64zm40 52c18 0 28-6 28-18 0-12-10-18-28-18H108v36h16zm10 72c20 0 30-6 30-20s-10-20-30-20H108v40h26z" fill="url(#g)"/>
+  <g opacity=".85">
+    <path d="M64 98c0-8 6-14 14-14h22c8 0 14 6 14 14v10c0 8-6 14-14 14h-5l-12 12v-12H78c-8 0-14-6-14-14V98z" fill="#111827" stroke="#334155"/>
+    <path d="M192 142c0 8-6 14-14 14h-22c-8 0-14-6-14-14v-10c0-8 6-14 14-14h5l12-12v12h5c8 0 14 6 14 14v10z" fill="#111827" stroke="#334155"/>
+  </g>
+</svg>
