@@ -6,6 +6,7 @@ import { TranslationComposer } from './components/TranslationComposer'
 import { TranslationOutput } from './components/TranslationOutput'
 import { TranslationHistory } from './components/TranslationHistory'
 import { ModalsContainer } from './components/ModalsContainer'
+import { AddToAppButton } from './components/AddToAppButton'
 import logoUrl from './assets/logo.svg'
 
 function AppContent() {
@@ -39,6 +40,7 @@ function AppContent() {
 
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
           <TranslationOutput />
+          <AddToAppButton />
           <TranslationHistory />
         </Box>
       </Container>
