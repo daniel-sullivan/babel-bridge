@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="logo-gradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#22C55E"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Subtle grid pattern -->
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#334155" stroke-width="0.5" opacity="0.3"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+
+  <!-- Logo (scaled up and centered-left) -->
+  <g transform="translate(100, 180) scale(1.2)">
+    <rect x="8" y="8" width="240" height="240" rx="36" fill="#0f1220" stroke="#22283a" stroke-width="4"/>
+    <path d="M84 64h56c28 0 44 14 44 32 0 14-10 26-28 30 20 4 32 16 32 32 0 20-18 34-46 34H84V64zm40 52c18 0 28-6 28-18 0-12-10-18-28-18H108v36h16zm10 72c20 0 30-6 30-20s-10-20-30-20H108v40h26z" fill="url(#logo-gradient)"/>
+    <g opacity=".85">
+      <path d="M64 98c0-8 6-14 14-14h22c8 0 14 6 14 14v10c0 8-6 14-14 14h-5l-12 12v-12H78c-8 0-14-6-14-14V98z" fill="#111827" stroke="#334155"/>
+      <path d="M192 142c0 8-6 14-14 14h-22c-8 0-14-6-14-14v-10c0-8 6-14 14-14h5l12-12v12h5c8 0 14 6 14 14v10z" fill="#111827" stroke="#334155"/>
+    </g>
+  </g>
+
+  <!-- Text content -->
+  <g transform="translate(450, 200)">
+    <!-- Title -->
+    <text x="0" y="0" font-family="system-ui, -apple-system, sans-serif" font-size="64" font-weight="700" fill="#f8fafc">
+      BabelBridge
+    </text>
+
+    <!-- Subtitle -->
+    <text x="0" y="60" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="400" fill="#94a3b8">
+      Modern Translation Tool
+    </text>
+
+    <!-- Description -->
+    <text x="0" y="120" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="300" fill="#64748b">
+      <tspan x="0" dy="0">AI-powered translation with live language</tspan>
+      <tspan x="0" dy="30">identification and context preservation</tspan>
+    </text>
+
+    <!-- Features -->
+    <g transform="translate(0, 180)">
+      <circle cx="8" cy="8" r="4" fill="#22C55E"/>
+      <text x="20" y="13" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#94a3b8">Intelligent context preservation</text>
+
+      <circle cx="8" cy="38" r="4" fill="#6366F1"/>
+      <text x="20" y="43" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#94a3b8">Live language identification</text>
+
+      <circle cx="8" cy="68" r="4" fill="#F59E0B"/>
+      <text x="20" y="73" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#94a3b8">Pluggable AI backends</text>
+    </g>
+  </g>
+
+  <!-- Decorative elements -->
+  <g opacity="0.1">
+    <circle cx="950" cy="150" r="80" fill="#6366F1"/>
+    <circle cx="1050" cy="450" r="60" fill="#22C55E"/>
+    <circle cx="1100" cy="250" r="40" fill="#F59E0B"/>
+  </g>
+</svg>
+
