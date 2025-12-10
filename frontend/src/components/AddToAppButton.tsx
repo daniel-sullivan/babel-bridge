@@ -35,10 +35,27 @@ export function AddToAppButton() {
     console.log('PWA: isIOS =', isIOS())
     console.log('PWA: isInStandaloneMode =', isInStandaloneMode())
     console.log('PWA: hasBeforeInstallPrompt =', 'onbeforeinstallprompt' in window)
+    console.log('PWA: hostname =', window.location.hostname)
+
+    // For localhost development: if no beforeinstallprompt after 2 seconds,
+    // assume it's available for testing (but only on localhost)
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    const isDev = process.env.NODE_ENV === 'development'
+
+    let timeoutId: NodeJS.Timeout | null = null
+    if (isDev && isLocalhost) {
+      timeoutId = setTimeout(() => {
+        if (!isInstallable && !isIOS()) {
+          console.log('PWA: No beforeinstallprompt after 2s, enabling for localhost testing')
+          setIsInstallable(true)
+        }
+      }, 2000)
+    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
       window.removeEventListener('appinstalled', handleAppInstalled)
+      if (timeoutId) clearTimeout(timeoutId)
     }
   }, [])
 
@@ -79,15 +96,20 @@ export function AddToAppButton() {
     return null
   }
 
-  // Show button if: installable OR iOS OR development mode (force show for testing)
-  const shouldShowButton = isInstallable || isIOS() || process.env.NODE_ENV === 'development'
+  // Show button if:
+  // 1. Actually installable (beforeinstallprompt fired), OR
+  // 2. iOS device (can always install via Safari), OR
+  // 3. Development mode AND localhost (for testing)
+  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  const isDev = process.env.NODE_ENV === 'development'
+  const shouldShowButton = isInstallable || isIOS() || (isDev && isLocalhost)
 
   if (!shouldShowButton) {
-    console.log('PWA: Button hidden - not installable, not iOS, not dev mode')
+    console.log('PWA: Button hidden - not installable, not iOS, not dev+localhost')
     return null
   }
 
-  console.log('PWA: Button will show - installable:', isInstallable, 'iOS:', isIOS(), 'dev:', process.env.NODE_ENV)
+  console.log('PWA: Button will show - installable:', isInstallable, 'iOS:', isIOS(), 'dev+localhost:', isDev && isLocalhost)
 
   return (
     <>
