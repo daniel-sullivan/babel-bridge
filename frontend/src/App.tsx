@@ -6,7 +6,7 @@ import { TranslationComposer } from './components/TranslationComposer'
 import { TranslationOutput } from './components/TranslationOutput'
 import { TranslationHistory } from './components/TranslationHistory'
 import { ModalsContainer } from './components/ModalsContainer'
-import { toLanguageName } from './utils/languages'
+import { AddToAppButton } from './components/AddToAppButton'
 import logoUrl from './assets/logo.svg'
 
 function AppContent() {
@@ -40,11 +40,12 @@ function AppContent() {
 
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
           <TranslationOutput />
+          <AddToAppButton />
           <TranslationHistory />
         </Box>
       </Container>
 
-      <AppFooter targetLang={context.targetLang} />
+      <AppFooter />
       <ModalsContainer />
     </Box>
   )
@@ -87,15 +88,7 @@ function AppHeader() {
     )
 }
 
-interface AppFooterProps {
-  targetLang: string
-}
-
-function AppFooter({ targetLang }: AppFooterProps) {
-  // Default to Japanese if no target language is set
-  const displayLang = targetLang || 'ja'
-  const flagEmoji = getFlagEmoji(displayLang)
-
+function AppFooter() {
   return (
     <Box
       component="footer"
@@ -104,28 +97,16 @@ function AppFooter({ targetLang }: AppFooterProps) {
         px: 3,
         display: 'flex',
         alignItems: 'center',
-        gap: 1,
+        justifyContent: 'center',
         borderTop: '1px solid',
         borderColor: 'divider',
         backgroundColor: 'background.paper',
       }}
     >
-      <Typography variant="body2" color="text.secondary">
-        Last target: {toLanguageName(displayLang)} {flagEmoji}
-      </Typography>
-      <Box
-        sx={{
-          width: 4,
-          height: 4,
-          borderRadius: '50%',
-          backgroundColor: 'text.secondary',
-          opacity: 0.5,
-        }}
-      />
       <Typography
         variant="body2"
         component="a"
-        href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie"
+        href="https://github.com/daniel-sullivan/babel-bridge"
         target="_blank"
         rel="noreferrer"
         sx={{
@@ -136,27 +117,12 @@ function AppFooter({ targetLang }: AppFooterProps) {
           },
         }}
       >
-        Session via cookie
+        © 2025 Daniel Sullivan
       </Typography>
     </Box>
   )
 }
 
-function getFlagEmoji(langCode: string): string {
-  const flags: Record<string, string> = {
-    ja: '🇯🇵',
-    es: '🇪🇸',
-    de: '🇩🇪',
-    en: '🇺🇸',
-    fr: '🇫🇷',
-    it: '🇮🇹',
-    pt: '🇵🇹',
-    zh: '🇨🇳',
-    ko: '🇰🇷',
-    ru: '🇷🇺'
-  }
-  return flags[langCode.split('-')[0]] || '🌐'
-}
 
 export default function App() {
   return (
