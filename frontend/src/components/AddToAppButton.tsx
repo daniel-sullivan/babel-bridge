@@ -11,22 +11,30 @@ export function AddToAppButton() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showIOSInstructions, setShowIOSInstructions] = useState(false)
   const [isInstallable, setIsInstallable] = useState(false)
+  const [showDebugInfo, setShowDebugInfo] = useState(false)
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
-      // Prevent the mini-infobar from appearing on mobile
+      console.log('PWA: beforeinstallprompt event fired')
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
       setIsInstallable(true)
     }
 
     const handleAppInstalled = () => {
+      console.log('PWA: app installed')
       setIsInstallable(false)
       setDeferredPrompt(null)
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     window.addEventListener('appinstalled', handleAppInstalled)
+
+    // Debug logging
+    console.log('PWA: Component mounted, checking conditions...')
+    console.log('PWA: isIOS =', isIOS())
+    console.log('PWA: isInStandaloneMode =', isInStandaloneMode())
+    console.log('PWA: hasBeforeInstallPrompt =', 'onbeforeinstallprompt' in window)
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
@@ -39,8 +47,14 @@ export function AddToAppButton() {
   }
 
   const isInStandaloneMode = () => {
-    return window.matchMedia('(display-mode: standalone)').matches ||
-           (window.navigator as any).standalone === true
+    try {
+      const matchMediaResult = window.matchMedia('(display-mode: standalone)')
+      return (matchMediaResult && matchMediaResult.matches) ||
+             (window.navigator as any).standalone === true
+    } catch (e) {
+      // Fallback for test environments or browsers without matchMedia
+      return (window.navigator as any).standalone === true
+    }
   }
 
   const handleInstallClick = async () => {
@@ -59,10 +73,21 @@ export function AddToAppButton() {
     }
   }
 
-  // Don't show the button if already installed or not installable
-  if (isInStandaloneMode() || (!isInstallable && !isIOS())) {
+  // Don't show the button if already installed
+  if (isInStandaloneMode()) {
+    console.log('PWA: Button hidden - already in standalone mode')
     return null
   }
+
+  // Show button if: installable OR iOS OR development mode (force show for testing)
+  const shouldShowButton = isInstallable || isIOS() || process.env.NODE_ENV === 'development'
+
+  if (!shouldShowButton) {
+    console.log('PWA: Button hidden - not installable, not iOS, not dev mode')
+    return null
+  }
+
+  console.log('PWA: Button will show - installable:', isInstallable, 'iOS:', isIOS(), 'dev:', process.env.NODE_ENV)
 
   return (
     <>
