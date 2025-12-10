@@ -2,7 +2,7 @@
 FROM node:24 AS frontend-build
 WORKDIR /app/frontend
 COPY frontend/package.json frontend/package-lock.json ./
-RUN npm install
+RUN npm ci --legacy-peer-deps
 COPY frontend/ ./
 RUN npm run build
 
