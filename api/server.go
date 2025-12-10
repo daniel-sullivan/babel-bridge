@@ -82,8 +82,41 @@ func NewServerWithTTLs(svc service.TranslationService, sessTTL, ctxTTL time.Dura
 	// serve static assets for the frontend
 	r.Static("/assets", "frontend/dist/assets")
 
-	// Root: ensure session and serve SPA
+	// serve PWA files and other static assets from dist root
+	r.StaticFile("/favicon.svg", "frontend/dist/favicon.svg")
+	r.StaticFile("/manifest.json", "frontend/dist/manifest.json")
+	r.StaticFile("/og-image.svg", "frontend/dist/og-image.svg")
+
+	// Root: first try to serve static files, then ensure session and serve SPA
 	r.GET("/", func(c *gin.Context) {
+		// Try to serve static files from dist root first
+		path := c.Request.URL.Path
+		if path != "/" {
+			if f, err := http.Dir("frontend/dist").Open(path); err == nil {
+				_ = f.Close()
+				c.File("frontend/dist" + path)
+				return
+			}
+		}
+
+		// Default to SPA index with session
+		s.issueSessionHandler(c)
+		if c.IsAborted() {
+			return
+		}
+		serveSPAIndex(c)
+	})
+
+	// Handle any other static files that weren't caught above
+	r.NoRoute(func(c *gin.Context) {
+		path := c.Request.URL.Path
+		// Try to serve from dist directory
+		if f, err := http.Dir("frontend/dist").Open(path); err == nil {
+			_ = f.Close()
+			c.File("frontend/dist" + path)
+			return
+		}
+		// Fall back to SPA index for client-side routing
 		s.issueSessionHandler(c)
 		if c.IsAborted() {
 			return

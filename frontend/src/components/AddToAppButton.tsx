@@ -37,16 +37,18 @@ export function AddToAppButton() {
     console.log('PWA: hasBeforeInstallPrompt =', 'onbeforeinstallprompt' in window)
     console.log('PWA: hostname =', window.location.hostname)
 
-    // For localhost development: if no beforeinstallprompt after 2 seconds,
-    // assume it's available for testing (but only on localhost)
+    // For development localhost OR production HTTPS: if no beforeinstallprompt after 2 seconds,
+    // assume it's available for testing/installation
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     const isDev = process.env.NODE_ENV === 'development'
+    const isHTTPS = window.location.protocol === 'https:'
+    const isProductionDomain = !isLocalhost && isHTTPS
 
     let timeoutId: NodeJS.Timeout | null = null
-    if (isDev && isLocalhost) {
+    if ((isDev && isLocalhost) || isProductionDomain) {
       timeoutId = setTimeout(() => {
         if (!isInstallable && !isIOS()) {
-          console.log('PWA: No beforeinstallprompt after 2s, enabling for localhost testing')
+          console.log('PWA: No beforeinstallprompt after 2s, enabling for production/localhost')
           setIsInstallable(true)
         }
       }, 2000)
@@ -99,17 +101,21 @@ export function AddToAppButton() {
   // Show button if:
   // 1. Actually installable (beforeinstallprompt fired), OR
   // 2. iOS device (can always install via Safari), OR
-  // 3. Development mode AND localhost (for testing)
+  // 3. Development mode AND localhost (for testing), OR
+  // 4. Production domain with HTTPS (assume PWA is available)
   const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   const isDev = process.env.NODE_ENV === 'development'
-  const shouldShowButton = isInstallable || isIOS() || (isDev && isLocalhost)
+  const isHTTPS = window.location.protocol === 'https:'
+  const isProductionDomain = !isLocalhost && isHTTPS
+
+  const shouldShowButton = isInstallable || isIOS() || (isDev && isLocalhost) || isProductionDomain
 
   if (!shouldShowButton) {
-    console.log('PWA: Button hidden - not installable, not iOS, not dev+localhost')
+    console.log('PWA: Button hidden - not installable, not iOS, not dev+localhost, not production HTTPS')
     return null
   }
 
-  console.log('PWA: Button will show - installable:', isInstallable, 'iOS:', isIOS(), 'dev+localhost:', isDev && isLocalhost)
+  console.log('PWA: Button will show - installable:', isInstallable, 'iOS:', isIOS(), 'dev+localhost:', isDev && isLocalhost, 'production:', isProductionDomain)
 
   return (
     <>
