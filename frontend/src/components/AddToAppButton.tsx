@@ -11,16 +11,18 @@ export function AddToAppButton() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showIOSInstructions, setShowIOSInstructions] = useState(false)
   const [isInstallable, setIsInstallable] = useState(false)
+  const [showDebugInfo, setShowDebugInfo] = useState(false)
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
-      // Prevent the mini-infobar from appearing on mobile
+      console.log('PWA: beforeinstallprompt event fired')
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
       setIsInstallable(true)
     }
 
     const handleAppInstalled = () => {
+      console.log('PWA: app installed')
       setIsInstallable(false)
       setDeferredPrompt(null)
     }
@@ -28,9 +30,32 @@ export function AddToAppButton() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     window.addEventListener('appinstalled', handleAppInstalled)
 
+    // Debug logging
+    console.log('PWA: Component mounted, checking conditions...')
+    console.log('PWA: isIOS =', isIOS())
+    console.log('PWA: isInStandaloneMode =', isInStandaloneMode())
+    console.log('PWA: hasBeforeInstallPrompt =', 'onbeforeinstallprompt' in window)
+    console.log('PWA: hostname =', window.location.hostname)
+
+    // For localhost development: if no beforeinstallprompt after 2 seconds,
+    // assume it's available for testing (but only on localhost)
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    const isDev = process.env.NODE_ENV === 'development'
+
+    let timeoutId: NodeJS.Timeout | null = null
+    if (isDev && isLocalhost) {
+      timeoutId = setTimeout(() => {
+        if (!isInstallable && !isIOS()) {
+          console.log('PWA: No beforeinstallprompt after 2s, enabling for localhost testing')
+          setIsInstallable(true)
+        }
+      }, 2000)
+    }
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
       window.removeEventListener('appinstalled', handleAppInstalled)
+      if (timeoutId) clearTimeout(timeoutId)
     }
   }, [])
 
@@ -39,8 +64,14 @@ export function AddToAppButton() {
   }
 
   const isInStandaloneMode = () => {
-    return window.matchMedia('(display-mode: standalone)').matches ||
-           (window.navigator as any).standalone === true
+    try {
+      const matchMediaResult = window.matchMedia('(display-mode: standalone)')
+      return (matchMediaResult && matchMediaResult.matches) ||
+             (window.navigator as any).standalone === true
+    } catch (e) {
+      // Fallback for test environments or browsers without matchMedia
+      return (window.navigator as any).standalone === true
+    }
   }
 
   const handleInstallClick = async () => {
@@ -59,10 +90,26 @@ export function AddToAppButton() {
     }
   }
 
-  // Don't show the button if already installed or not installable
-  if (isInStandaloneMode() || (!isInstallable && !isIOS())) {
+  // Don't show the button if already installed
+  if (isInStandaloneMode()) {
+    console.log('PWA: Button hidden - already in standalone mode')
     return null
   }
+
+  // Show button if:
+  // 1. Actually installable (beforeinstallprompt fired), OR
+  // 2. iOS device (can always install via Safari), OR
+  // 3. Development mode AND localhost (for testing)
+  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  const isDev = process.env.NODE_ENV === 'development'
+  const shouldShowButton = isInstallable || isIOS() || (isDev && isLocalhost)
+
+  if (!shouldShowButton) {
+    console.log('PWA: Button hidden - not installable, not iOS, not dev+localhost')
+    return null
+  }
+
+  console.log('PWA: Button will show - installable:', isInstallable, 'iOS:', isIOS(), 'dev+localhost:', isDev && isLocalhost)
 
   return (
     <>
